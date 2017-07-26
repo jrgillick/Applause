@@ -120,6 +120,11 @@ def predict(X, Y):
 	bigcor=0.
 	bigtot=0.
 
+	true_pos = 0.
+	false_pos = 0.
+	true_neg = 0.
+	false_neg = 0.
+
 	for train_index, test_index in kf:
 		correct=0.
 		total=0.
@@ -137,11 +142,23 @@ def predict(X, Y):
 			if y_true[i] == y_pred[i]:
 				correct+=1
 			total+=1
+
+			if y_true[i] == 1. and y_pred[i] == 1.: true_pos += 1
+			if y_true[i] == 0. and y_pred[i] == 1.: false_pos += 1
+			if y_true[i] == 0. and y_pred[i] == 0.: true_neg += 1
+			if y_true[i] == 1. and y_pred[i] == 0.: false_neg += 1
+
 		bigcor+=correct
 		bigtot+=total
 	acc=bigcor/bigtot
+	precision = (true_pos / (true_pos + false_pos))
+	recall = (true_pos / (true_pos + false_neg))
+	f1 = 2*(precision*recall)/(precision+recall)
 	std=math.sqrt( (acc * (1-acc)) / bigtot )
 	print "Accuracy: %.3f +/- %.3f (%s/%s)" % (acc, 1.96*std, bigcor, bigtot)
+	print "Precision: %.3f" % (precision)
+	print "Recall: %.3f" % (recall)
+	print "F-Score: %.3f" % (f1)
 
 	# print feature weights
 	logreg=linear_model.LogisticRegression(penalty='l1', C=0.1)
