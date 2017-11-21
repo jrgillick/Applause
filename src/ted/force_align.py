@@ -45,7 +45,7 @@ for audio_filename in audio_filenames:
 
         # Run forced alignment and store in json file
         json_filename = audio_filename.replace(".mp3",".json")
-        alignment_cmd = "curl -X POST -F 'audio=@temp_audio.mp3' -F 'transcript=<temp_text.txt' 'http://localhost:32774/transcriptions?async=false' > /data/corpora/ted/forced_alignments/" + json_filename
+        alignment_cmd = "curl -X POST -F 'audio=@temp_audio.mp3' -F 'transcript=<temp_text.txt' 'http://localhost:32776/transcriptions?async=false' > /data/corpora/ted/forced_alignments/" + json_filename
         os.system(alignment_cmd)
 
         # Remove temp files
