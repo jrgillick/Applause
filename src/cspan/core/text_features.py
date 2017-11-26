@@ -22,3 +22,9 @@ class TextFeatures:
 				continue
 			sentences.append(text)
 		return sentences
+
+	def get_mean_vector(self, sentence_list):
+		if len(sentence_list) == 0:
+			return np.zeros(300)
+		else:
+			return np.mean(np.array([nlp(sent).vector for sent in sentence_list]),axis=0)
