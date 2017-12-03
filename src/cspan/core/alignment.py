@@ -189,14 +189,27 @@ class Alignment:
 			i += 1
 		return phrase_list
 
-	def get_phrase_times(self,words):
+	def get_phrase_times(self):
+		words = self.clean_words
 		return [(words[phrase[0]]['start'], words[phrase[-1]]['end']) for phrase in self.phrase_list]
 
-	def get_phrase_text(self,words):
+	def get_phrase_text(self):
+		words = self.clean_words
 		return [' '.join([words[i]['word'] for i in p]) for p in self.phrase_list]
 
-	def get_phrase_text_and_times(self,words):
-		return [(' '.join([words[i]['word'] for i in p]),words[p[0]]['start'],words[p[-1]]['end']) for p in self.phrase_list]
+	def get_phrase_text_and_times(self):
+		words = self.clean_words
+		return [[' '.join([words[i]['word'] for i in p]),words[p[0]]['start'],words[p[-1]]['end']] for p in self.phrase_list]
+
+	def get_phrase_text_times_and_mean_applause_volume(self,applause_time=3):
+		phrase_text_and_times = self.get_phrase_text_and_times()
+		volumes = [np.mean(self.speech.get_rmse_at_times(p[2],p[2] + applause_time)) for p in phrase_text_and_times]
+		return [phrase_text_and_times[i] + [volumes[i]] for i in range(len(volumes))]
 
 	def get_phrase_lengths(self,phrase_text):
 		return [len(p.split(' ')) for p in phrase_text]
+
+	def get_preceding_phrases(self, start_time, max_time=25):
+		phrases = self.get_phrase_text_and_times()
+		return [p for p in phrases if p[2] < start_time and p[1] > start_time - max_time]
+		
