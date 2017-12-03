@@ -1,4 +1,4 @@
-import numpy as np, re, spacy
+import numpy as np, re, spacy, sys
 nlp = spacy.load('en')
 import pronouncing
 

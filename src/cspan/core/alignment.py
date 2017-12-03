@@ -1,5 +1,5 @@
 import json, numpy as np, spacy, re
-import sentence
+import sentence, vector_features
 nlp = spacy.load('en')
 
 class Alignment:
@@ -14,6 +14,7 @@ class Alignment:
 		self.transcript = self.get_transcript()
 		#self.sentence_list = self.get_sentence_list()
 		self.phrase_list = self.get_aligned_phrases(self.clean_words)
+		self.vector_features = self.get_vector_features()
 
 	def get_alignments(self):
 		try:
@@ -213,3 +214,5 @@ class Alignment:
 		phrases = self.get_phrase_text_and_times()
 		return [p for p in phrases if p[2] < start_time and p[1] > start_time - max_time]
 		
+	def get_vector_features(self):
+		return vector_features.VectorFeatures(self.get_phrase_text())
