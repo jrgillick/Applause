@@ -14,11 +14,12 @@ class Speech:
 		self.audio_file = audio_root_dir + file_path + ".mp3"
 		self.applause_times_file = applause_times_root_dir + file_path + ".txt"
 		self.load_stored_applause_predictions(file_path)
-		#self.load_stored_crowd_rmse()
+		self.load_stored_crowd_rmse()
 		self.alignment = alignment.Alignment(self.alignment_file)
 		self.alignment.speech = self
 		self.applause_preds_by_second = self.get_preds_by_second()
 		self.applause_list = applause_list.ApplauseList(self.applause_times_file)
+		self.phrase_audio_features = self.get_phrase_audio_features()
 
 		self.frame_rate = 43.06640625
 		self.hop_size = 512
@@ -74,3 +75,12 @@ class Speech:
 	def get_rmse_at_times(self, start_time, end_time):
 		return self.rmse[0][int(start_time*self.frame_rate):int(end_time*self.frame_rate)]
 
+	def get_phrase_audio_features(self):
+		path = self.audio_file.replace('/audio/','/phrase_audio_features/').replace('.mp3','.pkl')
+		with open(path) as f:
+			return pickle.load(f)
+
+	def get_relative_rmse(self, start_time, end_time):
+		mean_rmse = np.mean(self.rmse)
+		return (self.get_rmse_at_times(start_time, end_time) / mean_rmse)
+		

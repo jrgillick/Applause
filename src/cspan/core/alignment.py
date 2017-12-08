@@ -216,3 +216,9 @@ class Alignment:
 		
 	def get_vector_features(self):
 		return vector_features.VectorFeatures(self.get_phrase_text())
+
+	def applause_follows(self, end_time):
+		instances = self.speech.applause_list.get_instances()
+		return True if sum([self.spans_overlap(end_time, end_time + 1.5, instance[0], instance[1]) for instance in instances]) > 0 else False
+		
+		

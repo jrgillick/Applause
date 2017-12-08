@@ -4,6 +4,11 @@ import pronouncing
 
 #### Useful methods that don't need to be in the Class
 
+def add_to_hash(h,other_hash):
+	for k in other_hash.keys():
+		h[k] = other_hash[k]
+	return h
+
 # combine list of lists
 flatten = lambda l: [item for sublist in l for item in sublist]
 
@@ -124,7 +129,15 @@ class TextFeatures:
 
 	#### Methods for Euphony Features
 	def get_phone_list(self):
-		return [pronouncing.phones_for_word(w.lower())[0] for w in self.words]
+		l = []
+		for w in self.words:
+			try:
+				phones = pronouncing.phones_for_word(w.lower())[0]
+				l.append(phones)
+			except:
+				l.append('')
+		return l
+		#return [pronouncing.phones_for_word(w.lower())[0] for w in self.words]
 
 	def get_phone_count(self):
 		return sum([len(p) for p in self.split_phone_list])
@@ -170,12 +183,14 @@ class TextFeatures:
 	def get_applause_feature(self):
 		text = self.raw_text.lower() 
 		exp = re.compile("applau*")
-		return 1 if len(re.findall(exp,text)) > 0 else 0
+		feature = 1 if len(re.findall(exp,text)) > 0 else 0
+		return {'applause_feature':feature}
 
 	def get_thank_you_feature(self):
 		text = self.raw_text.lower() 
 		exp = re.compile("grateful*|thank*|gratitud*|appreciate*|bless*")
-		return 1 if len(re.findall(exp,text)) > 0 else 0
+		feature = 1 if len(re.findall(exp,text)) > 0 else 0
+		return {'thank_you_feature':feature}
 
 	def get_liwc_features(self):
 		all_keys = ["LIWC_" + v for v in liwc_vocab.values()]
@@ -185,13 +200,19 @@ class TextFeatures:
 			h[k] = 1 if k in keys else 0
 		return h
 
+	def get_liu_features(self):
+		feats = self.get_liwc_features()
+		feats = add_to_hash(feats, self.get_thank_you_feature())
+		feats = add_to_hash(feats, self.get_applause_feature())
+		return feats
+
 	##########
 
 
-	##### Methods for word vector features
+	########
 
-	def get_skip_thought_vector(self):
-		return
+
+	##### Methods for word vector features
 
 	def get_mean_vector(self, sentence_list):
 		if len(sentence_list) == 0:
