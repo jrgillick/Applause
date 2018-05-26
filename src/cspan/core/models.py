@@ -28,7 +28,20 @@ def train_cv_logistic_regression(X,y,penalty='l2'):
 	clf.fit(X, y)
 	return clf
 
-def evaluate_model(model, X, y, model_type='sklearn'):
+def train_cv_logistic_regression_faster(X,y,penalty='l2'):
+	logreg=linear_model.LogisticRegression(penalty=penalty)
+	clf = GridSearchCV(logreg, {'C':(0.01, 0.1, 3)}, cv=3)
+	clf.fit(X, y)
+	return clf
+
+def train_logistic_regression(X,y,C=0.1,penalty='l2'):
+	logreg=linear_model.LogisticRegression(penalty=penalty,C=C)
+	#clf = GridSearchCV(logreg, {'C':(0.001, .1, 3)}, cv=3)
+	clf = logreg
+	clf.fit(X, y)
+	return clf
+
+def evaluate_model(model, X, y, model_type='sklearn',verbose=True):
 	total_true = []; total_pred = []
 	y_true = y
 	if model_type == 'sklearn':
@@ -44,8 +57,12 @@ def evaluate_model(model, X, y, model_type='sklearn'):
 	std=math.sqrt( (acc * (1-acc)) / len(total_true) )
 	precision, recall, f1, support = [l[1] for l in precision_recall_fscore_support(y_true, y_pred)]
 	#print "Accuracy: %.3f +/- %.3f (%s/%s)" % (acc, 1.96*std, total_correct, len(total_true))
-	print "Accuracy: %.3f +/- %.3f (%s/%s) | Precision: %.3f | Recall: %.3f | F1: %.3f" % (acc, 1.96*std, total_correct, len(total_true), precision, recall, f1)
-	return (acc, precision, recall, f1)
+	if verbose:
+		print "Accuracy: %.3f +/- %.3f (%s/%s) | Precision: %.3f | Recall: %.3f | F1: %.3f" % (acc, 1.96*std, total_correct, len(total_true), precision, recall, f1)
+	#return (acc, precision, recall, f1)
+	return y_true, y_pred
+	#return total_correct, len(y)
+
 
 #### Neural Models
 
@@ -129,7 +146,63 @@ def format_multiple_phrase_input(sequence_list,labels,phrase_count=5):
 			formatted_list.append(sequence[j-phrase_count+1:j+1].reshape(-1))
 			formatted_labels.append(labels[i][j])
 	return formatted_list, formatted_labels
-	#return np.vstack(formatted_list)
+
+def format_balanced_multiple_phrase_input(sequence_list,labels,phrase_count=5):
+	formatted_list = []
+	formatted_labels = []
+	for i, sequence in enumerate(sequence_list):
+		all_positive_indices = np.where(np.array(labels[i]) == 1)[0]
+		all_positive_indices = [index for index in all_positive_indices if index >=phrase_count - 1]
+		all_negative_indices = np.where(np.array(labels[i]) == 0)[0]
+		all_negative_indices = [index for index in all_negative_indices if index >=phrase_count - 1]
+		n_labels_to_use = min(len(all_positive_indices),len(all_negative_indices))
+		if n_labels_to_use > 0:
+			selected_positive_indices = sorted(np.random.choice(all_positive_indices,n_labels_to_use,replace=False))
+			selected_negative_indices = sorted(np.random.choice(all_negative_indices,n_labels_to_use,replace=False))
+			for j in range(n_labels_to_use):
+				positive_index = selected_positive_indices[j]
+				negative_index = selected_negative_indices[j]
+				formatted_list.append(sequence[positive_index-phrase_count+1:positive_index+1].reshape(-1))
+				formatted_labels.append(labels[i][positive_index])
+				formatted_list.append(sequence[negative_index-phrase_count+1:negative_index+1].reshape(-1))
+				formatted_labels.append(labels[i][negative_index])
+		else:
+			5
+			#print "Empty..." + str(i)
+	return formatted_list, formatted_labels
+
+def format_balanced_multiple_phrase_input_with_deltas(sequence_list,labels,phrase_count=5):
+	formatted_list = []
+	formatted_labels = []
+	for i, sequence in enumerate(sequence_list):
+		all_positive_indices = np.where(np.array(labels[i]) == 1)[0]
+		all_positive_indices = [index for index in all_positive_indices if index >=phrase_count - 1]
+		all_negative_indices = np.where(np.array(labels[i]) == 0)[0]
+		all_negative_indices = [index for index in all_negative_indices if index >=phrase_count - 1]
+		n_labels_to_use = min(len(all_positive_indices),len(all_negative_indices))
+		if n_labels_to_use > 0:
+			selected_positive_indices = sorted(np.random.choice(all_positive_indices,n_labels_to_use,replace=False))
+			selected_negative_indices = sorted(np.random.choice(all_negative_indices,n_labels_to_use,replace=False))
+			for j in range(n_labels_to_use):
+				positive_l = []
+				negative_l = []
+				positive_index = selected_positive_indices[j]
+				negative_index = selected_negative_indices[j]
+				for k in range(phrase_count):
+					positive_l_initial = list(sequence[positive_index-k])
+					positive_l_minus_1 = list(sequence[positive_index-k-1])
+					positive_delta_1 = list(np.array(positive_l_minus_1) - np.array(positive_l_initial))
+					positive_l += positive_l_initial; positive_l += positive_delta_1
+					negative_l_initial = list(sequence[negative_index-k])
+					negative_l_minus_1 = list(sequence[negative_index-k-1])
+					negative_delta_1 = list(np.array(negative_l_minus_1) - np.array(negative_l_initial))
+					negative_l += negative_l_initial; negative_l += negative_delta_1
+				formatted_list.append(np.array(positive_l)); formatted_list.append(np.array(negative_l))
+				formatted_labels.append(labels[i][positive_index]); formatted_labels.append(labels[i][negative_index])
+		else:
+			5
+			#print "Empty..." + str(i)
+	return formatted_list, formatted_labels
 
 def format_multiple_phrase_input_with_deltas(sequence_list,labels,phrase_count=5):
 	formatted_list = []

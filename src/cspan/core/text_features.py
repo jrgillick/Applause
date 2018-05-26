@@ -4,6 +4,8 @@ import pronouncing
 
 #### Useful methods that don't need to be in the Class
 
+name_list = ['rick', 'santorum', 'mike', 'pence', 'carly', 'fiorina', 'barack', 'obama', 'rand', 'paul', 'lindsey', 'graham', 'chris', 'christie', 'john', 'kasich', 'gary', 'johnson', 'mike', 'huckabee', 'jeb', 'bush', 'ben', 'carson', 'donald', 'trump', 'bernie', 'sanders', 'marco', 'rubio', 'bill', 'clinton', 'hilary', 'clinton', 'joe', 'biden', 'ted', 'cruz']
+
 def add_to_hash(h,other_hash):
 	for k in other_hash.keys():
 		h[k] = other_hash[k]
@@ -117,7 +119,7 @@ plosive_list = ['P','T','K','B','D','G']
 class TextFeatures:
 	def __init__(self, raw_text):
 		self.raw_text = raw_text
-		self.doc = self.get_doc()
+		#self.doc = self.get_doc()
 		self.words = self.raw_text.split(' ')
 		#self.sentences = self.get_sentences()
 
@@ -206,7 +208,22 @@ class TextFeatures:
 		feats = add_to_hash(feats, self.get_applause_feature())
 		return feats
 
+	def get_name_features(self):
+		text = self.raw_text.lower()
+		h = {}
+		for name in name_list:
+			h["name"+name] = 1 if name in text else 0
+		return h
+
 	##########
+
+	def get_n_grams(self,n):
+		text = self.raw_text.lower()
+		words = text.split(' ')
+		n_grams = []
+		for i in range(n-1,len(words)):
+			n_grams.append("_".join(words[i-n+1:i+1]))
+		return n_grams
 
 
 	########

@@ -26,11 +26,50 @@ def get_skip_thought_data(speeches):
 		feats.append(f.get_skip_thought_features())
 	return feats
 
+def get_rst_data(speeches):
+	feats = []
+	for s in tqdm(speeches):
+		f = featurizer.Featurizer(s)
+		feats.append(f.get_rst_features())
+	return feats
+
 def get_liu_data(speeches):
 	feats = []
 	for s in tqdm(speeches):
 		f = featurizer.Featurizer(s)
 		feat = f.get_liu_features()
+		feats.append(np.array(feat))
+	return feats
+
+def get_name_data(speeches):
+	feats = []
+	for s in tqdm(speeches):
+		f = featurizer.Featurizer(s)
+		feat = f.get_name_features()
+		feats.append(np.array(feat))
+	return feats
+
+def get_unigram_data(speeches):
+	feats = []
+	for s in tqdm(speeches):
+		f = featurizer.Featurizer(s)
+		feat = f.get_unigram_features()
+		feats.append(np.array(feat))
+	return feats
+
+def get_bigram_data(speeches):
+	feats = []
+	for s in tqdm(speeches):
+		f = featurizer.Featurizer(s)
+		feat = f.get_bigram_features()
+		feats.append(np.array(feat))
+	return feats
+
+def get_trigram_data(speeches):
+	feats = []
+	for s in tqdm(speeches):
+		f = featurizer.Featurizer(s)
+		feat = f.get_trigram_features()
 		feats.append(np.array(feat))
 	return feats
 

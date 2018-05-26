@@ -80,6 +80,33 @@ class Speech:
 		with open(path) as f:
 			return pickle.load(f)
 
+	def normalize_phrase_audio_features(self):
+		cats = {}
+		for k in self.phrase_audio_features[0].keys():
+			cats[k] = []
+		for f in self.phrase_audio_features:
+			if f is not None:
+				for c in cats:
+					cats[c].append(f[c])
+		means = {}
+		devs = {}
+		for k in cats.keys():
+			means[k] = np.mean(cats[k])
+			devs[k] = np.std(cats[k])
+    
+		for i,f in enumerate(self.phrase_audio_features):
+			if f is None: #Set to zeros if data is missing
+				self.phrase_audio_features[i] = {}
+				for k in cats.keys():
+					self.phrase_audio_features[i][k] = 0.
+			else:
+				for k in cats.keys():
+					f[k] -= means[k]
+					if devs[k] != 0:
+						f[k] /= devs[k]
+
+
+
 	def get_relative_rmse(self, start_time, end_time):
 		mean_rmse = np.mean(self.rmse)
 		return (self.get_rmse_at_times(start_time, end_time) / mean_rmse)

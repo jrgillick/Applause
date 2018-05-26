@@ -23,3 +23,8 @@ src/ted/good_transcripts.pkl
 src/ted/best_ff_model.h5
 src/ted/best_ff_model2.h5
 best_model.h5
+
+asr-evaluation
+src/cspan/core/jeb_featurizer.py
+src/cspan/core/jeb_speech.py
+src/cspan/core/jeb_speech.pyc

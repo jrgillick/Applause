@@ -77,10 +77,10 @@ def get_detected_applause_audio(instances,y,sr):
 def get_total_applause_minutes(instances):
     return sum([i[1]-i[0] for i in instances])/60
 
-with open('../Detection/means.pkl','r') as f:
+with open('../../Detection/means.pkl','r') as f:
     means = pickle.load(f)
     
-with open('../Detection/std_devs.pkl', 'r') as f:
+with open('../../Detection/std_devs.pkl', 'r') as f:
     std_devs = pickle.load(f)
     
 
@@ -94,7 +94,8 @@ applause_times_root_dir = '/data/corpora/cspan/applause_times/'
 
 def find_and_save_applause_times(speech_audio_file):
     print speech_audio_file
-    outfile = applause_times_root_dir + speech_audio_file.split('audio/')[1].replace('.mp3','.txt')
+    #outfile = applause_times_root_dir + speech_audio_file.split('audio/')[1].replace('.mp3','.txt')
+    outfile = '/home/jrgillick/jeb_applause_times.txt'
     print outfile
     y, sr = librosa.load(speech_audio_file)
     feats = extract_features(speech_audio_file)
@@ -116,12 +117,13 @@ def find_and_save_applause_times(speech_audio_file):
 
 
 if __name__ == '__main__':
-    start_file = int(sys.argv[1]); end_file = int(sys.argv[2])
-    files=files[start_file:end_file]
+    #start_file = int(sys.argv[1]); end_file = int(sys.argv[2])
+    #files=files[start_file:end_file]
+    files = ['/home/jrgillick/jeb_please_clap.mp3']
     from keras.backend.tensorflow_backend import set_session
-    config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = 0.075
-    set_session(tf.Session(config=config))
+    #config = tf.ConfigProto()
+    #config.gpu_options.per_process_gpu_memory_fraction = 0.075
+    #set_session(tf.Session(config=config))
     model = load_model('../../Detection/applause_model.h5')
     for f in files:
         find_and_save_applause_times(f)
